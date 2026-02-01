@@ -1,12 +1,18 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { 
   processImage, 
-  createTransparentVersion, 
   resizeImage,
   ProcessingSettings,
   defaultSettings,
-  SketchMode 
 } from '@/lib/sketchProcessing';
+import {
+  ExportFormat,
+  createTransparentVersion,
+  createA4PrintLayout,
+  createColoringBookExport,
+  createBWPrintExport,
+  downloadCanvas,
+} from '@/lib/exportUtils';
 
 export interface UseImageProcessingReturn {
   originalImage: HTMLImageElement | null;
@@ -16,8 +22,10 @@ export interface UseImageProcessingReturn {
   setSettings: React.Dispatch<React.SetStateAction<ProcessingSettings>>;
   loadImage: (file: File) => Promise<void>;
   loadImageFromUrl: (url: string) => Promise<void>;
+  loadImageFromBlob: (blob: Blob) => Promise<void>;
   processCurrentImage: () => void;
-  exportImage: (format: 'png' | 'jpg' | 'transparent') => void;
+  rotateImage: (degrees: number) => void;
+  exportImage: (format: ExportFormat) => void;
   reset: () => void;
   originalCanvasRef: React.RefObject<HTMLCanvasElement>;
   processedCanvasRef: React.RefObject<HTMLCanvasElement>;
@@ -121,43 +129,103 @@ export function useImageProcessing(): UseImageProcessingReturn {
       img.src = url;
     });
   }, []);
+
+  const loadImageFromBlob = useCallback(async (blob: Blob): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        setOriginalImage(img);
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      img.onerror = (e) => {
+        URL.revokeObjectURL(url);
+        reject(e);
+      };
+      img.src = url;
+    });
+  }, []);
+
+  const rotateImage = useCallback((degrees: number) => {
+    if (!originalImage) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Swap dimensions for 90/270 degree rotations
+    const isVerticalRotation = Math.abs(degrees) === 90 || Math.abs(degrees) === 270;
+    canvas.width = isVerticalRotation ? originalImage.height : originalImage.width;
+    canvas.height = isVerticalRotation ? originalImage.width : originalImage.height;
+
+    // Move to center, rotate, then draw
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((degrees * Math.PI) / 180);
+    ctx.drawImage(
+      originalImage, 
+      -originalImage.width / 2, 
+      -originalImage.height / 2
+    );
+
+    // Create new image from rotated canvas
+    const rotatedUrl = canvas.toDataURL('image/png');
+    const newImg = new Image();
+    newImg.onload = () => {
+      setOriginalImage(newImg);
+    };
+    newImg.src = rotatedUrl;
+  }, [originalImage]);
   
-  const exportImage = useCallback((format: 'png' | 'jpg' | 'transparent') => {
+  const exportImage = useCallback((format: ExportFormat) => {
     if (!processedCanvasRef.current) return;
     
     const canvas = processedCanvasRef.current;
-    let dataUrl: string;
-    let filename: string;
     
-    if (format === 'transparent') {
-      // Create transparent version
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const transparentData = createTransparentVersion(imageData);
-      
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-      const tempCtx = tempCanvas.getContext('2d');
-      if (!tempCtx) return;
-      tempCtx.putImageData(transparentData, 0, 0);
-      
-      dataUrl = tempCanvas.toDataURL('image/png');
-      filename = 'outlinio-sketch-transparent.png';
-    } else if (format === 'jpg') {
-      dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-      filename = 'outlinio-sketch.jpg';
-    } else {
-      dataUrl = canvas.toDataURL('image/png');
-      filename = 'outlinio-sketch.png';
+    switch (format) {
+      case 'png':
+        downloadCanvas(canvas, 'outlinio-sketch.png', 'png');
+        break;
+        
+      case 'jpg':
+        downloadCanvas(canvas, 'outlinio-sketch.jpg', 'jpeg', 0.95);
+        break;
+        
+      case 'transparent': {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const transparentData = createTransparentVersion(imageData);
+        
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        if (!tempCtx) return;
+        tempCtx.putImageData(transparentData, 0, 0);
+        
+        downloadCanvas(tempCanvas, 'outlinio-sketch-transparent.png', 'png');
+        break;
+      }
+        
+      case 'print-a4': {
+        const a4Canvas = createA4PrintLayout(canvas);
+        downloadCanvas(a4Canvas, 'outlinio-sketch-a4.png', 'png');
+        break;
+      }
+        
+      case 'coloring-book': {
+        const coloringCanvas = createColoringBookExport(canvas);
+        downloadCanvas(coloringCanvas, 'outlinio-coloring-page.png', 'png');
+        break;
+      }
+        
+      case 'bw-print': {
+        const bwCanvas = createBWPrintExport(canvas);
+        downloadCanvas(bwCanvas, 'outlinio-bw-print.png', 'png');
+        break;
+      }
     }
-    
-    // Trigger download
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = dataUrl;
-    link.click();
   }, []);
   
   const reset = useCallback(() => {
@@ -174,7 +242,9 @@ export function useImageProcessing(): UseImageProcessingReturn {
     setSettings,
     loadImage,
     loadImageFromUrl,
+    loadImageFromBlob,
     processCurrentImage,
+    rotateImage,
     exportImage,
     reset,
     originalCanvasRef,
