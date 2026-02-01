@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, RotateCcw, Sun, Contrast } from 'lucide-react';
 import ComparisonSlider from './ComparisonSlider';
 import ControlSlider from './ControlSlider';
 import SketchModeSelector from './SketchModeSelector';
 import ExportMenu from './ExportMenu';
+import PreProcessingTools from './PreProcessingTools';
+import ImageCropper from './ImageCropper';
 import { useImageProcessing } from '@/hooks/useImageProcessing';
-import { ProcessingSettings, SketchMode } from '@/lib/sketchProcessing';
+import { ProcessingSettings } from '@/lib/sketchProcessing';
 
 interface ImageEditorProps {
   imageFile: File;
@@ -21,12 +23,15 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
     settings,
     setSettings,
     loadImage,
+    loadImageFromBlob,
+    rotateImage,
     exportImage,
     originalCanvasRef,
     processedCanvasRef,
   } = useImageProcessing();
 
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   useEffect(() => {
     loadImage(imageFile);
@@ -35,12 +40,35 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
     return () => URL.revokeObjectURL(url);
   }, [imageFile, loadImage]);
 
+  // Update original URL when image changes (after rotate/crop)
+  useEffect(() => {
+    if (originalImage) {
+      const canvas = document.createElement('canvas');
+      canvas.width = originalImage.width;
+      canvas.height = originalImage.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(originalImage, 0, 0);
+        setOriginalUrl(canvas.toDataURL('image/png'));
+      }
+    }
+  }, [originalImage]);
+
   const updateSetting = <K extends keyof ProcessingSettings>(
     key: K,
     value: ProcessingSettings[K]
   ) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
+
+  const handleCrop = useCallback(async (croppedBlob: Blob) => {
+    await loadImageFromBlob(croppedBlob);
+    setShowCropper(false);
+  }, [loadImageFromBlob]);
+
+  const handleRotate = useCallback((degrees: number) => {
+    rotateImage(degrees);
+  }, [rotateImage]);
 
   return (
     <div className="min-h-screen pt-20 pb-12">
@@ -110,6 +138,15 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
             transition={{ delay: 0.2 }}
             className="space-y-6"
           >
+            {/* Pre-processing Tools */}
+            <div className="glass-card p-5">
+              <PreProcessingTools
+                onCrop={() => setShowCropper(true)}
+                onRotate={handleRotate}
+                disabled={isProcessing || !originalImage}
+              />
+            </div>
+
             {/* Sketch Mode Selector */}
             <div className="glass-card p-5">
               <SketchModeSelector
@@ -187,6 +224,17 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
         <canvas ref={originalCanvasRef} className="hidden" />
         <canvas ref={processedCanvasRef} className="hidden" />
       </div>
+
+      {/* Crop Modal */}
+      <AnimatePresence>
+        {showCropper && originalUrl && (
+          <ImageCropper
+            imageUrl={originalUrl}
+            onCrop={handleCrop}
+            onCancel={() => setShowCropper(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
