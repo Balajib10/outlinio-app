@@ -142,17 +142,55 @@ export function createBWPrintExport(canvas: HTMLCanvasElement): HTMLCanvasElemen
   return bwCanvas;
 }
 
-export function downloadCanvas(
+// Convert canvas to blob - more reliable than toDataURL
+function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  type = 'image/png',
+  quality = 0.95
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to convert canvas to blob'));
+        }
+      },
+      type,
+      type === 'image/jpeg' ? quality : undefined
+    );
+  });
+}
+
+export async function downloadCanvas(
   canvas: HTMLCanvasElement, 
   filename: string, 
   format: 'png' | 'jpeg' = 'png',
   quality: number = 0.95
-): void {
-  const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
-  const dataUrl = canvas.toDataURL(mimeType, quality);
-  
-  const link = document.createElement('a');
-  link.download = filename;
-  link.href = dataUrl;
-  link.click();
+): Promise<void> {
+  try {
+    const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const blob = await canvasToBlob(canvas, mimeType, quality);
+    
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Download failed:', error);
+    // Fallback to dataURL method
+    const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const dataUrl = canvas.toDataURL(mimeType, quality);
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 }
