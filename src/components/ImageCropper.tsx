@@ -15,30 +15,60 @@ interface CropArea {
   height: number;
 }
 
+interface ImageOffset {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
 const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const [cropArea, setCropArea] = useState<CropArea>({ x: 0, y: 0, width: 100, height: 100 });
+  const [imageOffset, setImageOffset] = useState<ImageOffset>({ left: 0, top: 0, width: 0, height: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  useEffect(() => {
-    if (imageLoaded && imageRef.current && containerRef.current) {
+  const updateImageOffset = useCallback(() => {
+    if (imageRef.current && containerRef.current) {
       const imgRect = imageRef.current.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
       
-      // Center crop area initially (80% of image)
-      const padding = 0.1;
-      setCropArea({
-        x: imgRect.width * padding,
-        y: imgRect.height * padding,
-        width: imgRect.width * (1 - 2 * padding),
-        height: imgRect.height * (1 - 2 * padding),
+      setImageOffset({
+        left: imgRect.left - containerRect.left,
+        top: imgRect.top - containerRect.top,
+        width: imgRect.width,
+        height: imgRect.height,
       });
     }
-  }, [imageLoaded]);
+  }, []);
+
+  useEffect(() => {
+    if (imageLoaded) {
+      updateImageOffset();
+      
+      // Initialize crop area at 80% of image
+      if (imageRef.current) {
+        const imgRect = imageRef.current.getBoundingClientRect();
+        const padding = 0.1;
+        setCropArea({
+          x: imgRect.width * padding,
+          y: imgRect.height * padding,
+          width: imgRect.width * (1 - 2 * padding),
+          height: imgRect.height * (1 - 2 * padding),
+        });
+      }
+    }
+  }, [imageLoaded, updateImageOffset]);
+
+  // Update offset on window resize
+  useEffect(() => {
+    window.addEventListener('resize', updateImageOffset);
+    return () => window.removeEventListener('resize', updateImageOffset);
+  }, [updateImageOffset]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, action: string) => {
     e.preventDefault();
@@ -54,23 +84,22 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging && !isResizing) return;
-    if (!imageRef.current) return;
 
-    const imgRect = imageRef.current.getBoundingClientRect();
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
-
     setDragStart({ x: e.clientX, y: e.clientY });
 
     setCropArea(prev => {
       let { x, y, width, height } = prev;
+      const imgWidth = imageOffset.width;
+      const imgHeight = imageOffset.height;
 
       if (isDragging) {
-        x = Math.max(0, Math.min(imgRect.width - width, x + dx));
-        y = Math.max(0, Math.min(imgRect.height - height, y + dy));
+        x = Math.max(0, Math.min(imgWidth - width, x + dx));
+        y = Math.max(0, Math.min(imgHeight - height, y + dy));
       } else if (isResizing) {
         if (isResizing.includes('e')) {
-          width = Math.max(50, Math.min(imgRect.width - x, width + dx));
+          width = Math.max(50, Math.min(imgWidth - x, width + dx));
         }
         if (isResizing.includes('w')) {
           const newWidth = Math.max(50, width - dx);
@@ -81,7 +110,7 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
           }
         }
         if (isResizing.includes('s')) {
-          height = Math.max(50, Math.min(imgRect.height - y, height + dy));
+          height = Math.max(50, Math.min(imgHeight - y, height + dy));
         }
         if (isResizing.includes('n')) {
           const newHeight = Math.max(50, height - dy);
@@ -95,7 +124,7 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
 
       return { x, y, width, height };
     });
-  }, [isDragging, isResizing, dragStart]);
+  }, [isDragging, isResizing, dragStart, imageOffset]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -136,6 +165,10 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
     }, 'image/png');
   }, [cropArea, onCrop]);
 
+  // Calculate absolute positions for crop area overlay
+  const cropAbsoluteLeft = imageOffset.left + cropArea.x;
+  const cropAbsoluteTop = imageOffset.top + cropArea.y;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -174,29 +207,61 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
             draggable={false}
           />
 
-          {imageLoaded && (
+          {imageLoaded && imageOffset.width > 0 && (
             <>
-              {/* Overlay */}
+              {/* Dark overlay with hole for crop area */}
               <div 
-                className="absolute inset-0 bg-background/60 pointer-events-none"
+                className="absolute inset-0 pointer-events-none"
                 style={{
-                  clipPath: `polygon(
-                    0 0, 100% 0, 100% 100%, 0 100%, 0 0,
-                    ${cropArea.x}px ${cropArea.y}px,
-                    ${cropArea.x}px ${cropArea.y + cropArea.height}px,
-                    ${cropArea.x + cropArea.width}px ${cropArea.y + cropArea.height}px,
-                    ${cropArea.x + cropArea.width}px ${cropArea.y}px,
-                    ${cropArea.x}px ${cropArea.y}px
-                  )`
+                  background: `
+                    linear-gradient(to right, 
+                      rgba(0,0,0,0.6) ${cropAbsoluteLeft}px, 
+                      transparent ${cropAbsoluteLeft}px, 
+                      transparent ${cropAbsoluteLeft + cropArea.width}px, 
+                      rgba(0,0,0,0.6) ${cropAbsoluteLeft + cropArea.width}px
+                    ),
+                    linear-gradient(to bottom, 
+                      rgba(0,0,0,0.6) ${cropAbsoluteTop}px, 
+                      transparent ${cropAbsoluteTop}px, 
+                      transparent ${cropAbsoluteTop + cropArea.height}px, 
+                      rgba(0,0,0,0.6) ${cropAbsoluteTop + cropArea.height}px
+                    )
+                  `,
+                  backgroundBlendMode: 'multiply'
                 }}
               />
+              
+              {/* Simpler overlay using 4 rectangles */}
+              <div className="absolute pointer-events-none bg-black/60" style={{ 
+                left: 0, top: 0, 
+                width: '100%', 
+                height: cropAbsoluteTop 
+              }} />
+              <div className="absolute pointer-events-none bg-black/60" style={{ 
+                left: 0, 
+                top: cropAbsoluteTop + cropArea.height, 
+                width: '100%', 
+                bottom: 0 
+              }} />
+              <div className="absolute pointer-events-none bg-black/60" style={{ 
+                left: 0, 
+                top: cropAbsoluteTop, 
+                width: cropAbsoluteLeft, 
+                height: cropArea.height 
+              }} />
+              <div className="absolute pointer-events-none bg-black/60" style={{ 
+                left: cropAbsoluteLeft + cropArea.width, 
+                top: cropAbsoluteTop, 
+                right: 0, 
+                height: cropArea.height 
+              }} />
 
-              {/* Crop area */}
+              {/* Crop area border */}
               <div
                 className="absolute border-2 border-primary cursor-move"
                 style={{
-                  left: cropArea.x,
-                  top: cropArea.y,
+                  left: cropAbsoluteLeft,
+                  top: cropAbsoluteTop,
                   width: cropArea.width,
                   height: cropArea.height,
                 }}
@@ -209,6 +274,14 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
                   </div>
                 </div>
 
+                {/* Grid lines */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute left-1/3 top-0 bottom-0 w-px bg-primary/40" />
+                  <div className="absolute left-2/3 top-0 bottom-0 w-px bg-primary/40" />
+                  <div className="absolute top-1/3 left-0 right-0 h-px bg-primary/40" />
+                  <div className="absolute top-2/3 left-0 right-0 h-px bg-primary/40" />
+                </div>
+
                 {/* Resize handles */}
                 {['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map((dir) => (
                   <div
@@ -217,7 +290,8 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
                       dir.includes('n') ? '-top-2' : dir.includes('s') ? '-bottom-2' : 'top-1/2 -translate-y-1/2'
                     } ${
                       dir.includes('e') ? '-right-2' : dir.includes('w') ? '-left-2' : 'left-1/2 -translate-x-1/2'
-                    } cursor-${dir}-resize`}
+                    }`}
+                    style={{ cursor: `${dir}-resize` }}
                     onMouseDown={(e) => handleMouseDown(e, dir)}
                   />
                 ))}
