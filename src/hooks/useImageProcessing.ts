@@ -177,54 +177,58 @@ export function useImageProcessing(): UseImageProcessingReturn {
     newImg.src = rotatedUrl;
   }, [originalImage]);
   
-  const exportImage = useCallback((format: ExportFormat) => {
+  const exportImage = useCallback(async (format: ExportFormat) => {
     if (!processedCanvasRef.current) return;
     
     const canvas = processedCanvasRef.current;
     
-    switch (format) {
-      case 'png':
-        downloadCanvas(canvas, 'outlinio-sketch.png', 'png');
-        break;
-        
-      case 'jpg':
-        downloadCanvas(canvas, 'outlinio-sketch.jpg', 'jpeg', 0.95);
-        break;
-        
-      case 'transparent': {
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const transparentData = createTransparentVersion(imageData);
-        
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        if (!tempCtx) return;
-        tempCtx.putImageData(transparentData, 0, 0);
-        
-        downloadCanvas(tempCanvas, 'outlinio-sketch-transparent.png', 'png');
-        break;
+    try {
+      switch (format) {
+        case 'png':
+          await downloadCanvas(canvas, 'outlinio-sketch.png', 'png');
+          break;
+          
+        case 'jpg':
+          await downloadCanvas(canvas, 'outlinio-sketch.jpg', 'jpeg', 0.95);
+          break;
+          
+        case 'transparent': {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const transparentData = createTransparentVersion(imageData);
+          
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          if (!tempCtx) return;
+          tempCtx.putImageData(transparentData, 0, 0);
+          
+          await downloadCanvas(tempCanvas, 'outlinio-sketch-transparent.png', 'png');
+          break;
+        }
+          
+        case 'print-a4': {
+          const a4Canvas = createA4PrintLayout(canvas);
+          await downloadCanvas(a4Canvas, 'outlinio-sketch-a4.png', 'png');
+          break;
+        }
+          
+        case 'coloring-book': {
+          const coloringCanvas = createColoringBookExport(canvas);
+          await downloadCanvas(coloringCanvas, 'outlinio-coloring-page.png', 'png');
+          break;
+        }
+          
+        case 'bw-print': {
+          const bwCanvas = createBWPrintExport(canvas);
+          await downloadCanvas(bwCanvas, 'outlinio-bw-print.png', 'png');
+          break;
+        }
       }
-        
-      case 'print-a4': {
-        const a4Canvas = createA4PrintLayout(canvas);
-        downloadCanvas(a4Canvas, 'outlinio-sketch-a4.png', 'png');
-        break;
-      }
-        
-      case 'coloring-book': {
-        const coloringCanvas = createColoringBookExport(canvas);
-        downloadCanvas(coloringCanvas, 'outlinio-coloring-page.png', 'png');
-        break;
-      }
-        
-      case 'bw-print': {
-        const bwCanvas = createBWPrintExport(canvas);
-        downloadCanvas(bwCanvas, 'outlinio-bw-print.png', 'png');
-        break;
-      }
+    } catch (error) {
+      console.error('Export failed:', error);
     }
   }, []);
   
