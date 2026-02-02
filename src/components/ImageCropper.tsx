@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, Move } from 'lucide-react';
+import { Check, X, Move, RotateCcw } from 'lucide-react';
 
 interface ImageCropperProps {
   imageUrl: string;
@@ -46,23 +46,25 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
     }
   }, []);
 
+  const resetCropArea = useCallback(() => {
+    if (imageRef.current) {
+      const imgRect = imageRef.current.getBoundingClientRect();
+      const padding = 0.1;
+      setCropArea({
+        x: imgRect.width * padding,
+        y: imgRect.height * padding,
+        width: imgRect.width * (1 - 2 * padding),
+        height: imgRect.height * (1 - 2 * padding),
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (imageLoaded) {
       updateImageOffset();
-      
-      // Initialize crop area at 80% of image
-      if (imageRef.current) {
-        const imgRect = imageRef.current.getBoundingClientRect();
-        const padding = 0.1;
-        setCropArea({
-          x: imgRect.width * padding,
-          y: imgRect.height * padding,
-          width: imgRect.width * (1 - 2 * padding),
-          height: imgRect.height * (1 - 2 * padding),
-        });
-      }
+      resetCropArea();
     }
-  }, [imageLoaded, updateImageOffset]);
+  }, [imageLoaded, updateImageOffset, resetCropArea]);
 
   // Update offset on window resize
   useEffect(() => {
@@ -183,6 +185,10 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-display font-semibold">Crop Image</h3>
           <div className="flex items-center gap-2">
+            <button onClick={resetCropArea} className="btn-secondary px-4 py-2 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </button>
             <button onClick={onCancel} className="btn-secondary px-4 py-2 flex items-center gap-2">
               <X className="w-4 h-4" />
               Cancel
