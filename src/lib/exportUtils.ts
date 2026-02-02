@@ -149,6 +149,12 @@ function canvasToBlob(
   quality = 0.95
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
+    // Ensure canvas has valid dimensions
+    if (!canvas.width || !canvas.height) {
+      reject(new Error('Canvas has invalid dimensions'));
+      return;
+    }
+    
     canvas.toBlob(
       (blob) => {
         if (blob) {
@@ -169,6 +175,12 @@ export async function downloadCanvas(
   format: 'png' | 'jpeg' = 'png',
   quality: number = 0.95
 ): Promise<void> {
+  // Validate canvas
+  if (!canvas || !canvas.width || !canvas.height) {
+    console.error('Invalid canvas for download:', { width: canvas?.width, height: canvas?.height });
+    return;
+  }
+
   try {
     const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
     const blob = await canvasToBlob(canvas, mimeType, quality);
@@ -177,6 +189,7 @@ export async function downloadCanvas(
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
+    link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -220,9 +220,9 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
           </motion.div>
         </div>
 
-        {/* Hidden Canvases for Processing */}
-        <canvas ref={originalCanvasRef} className="hidden" />
-        <canvas ref={processedCanvasRef} className="hidden" />
+        {/* Hidden Canvases for Processing - use visibility instead of display:none to preserve dimensions */}
+        <canvas ref={originalCanvasRef} style={{ position: 'absolute', left: '-9999px', visibility: 'hidden' }} />
+        <canvas ref={processedCanvasRef} style={{ position: 'absolute', left: '-9999px', visibility: 'hidden' }} />
       </div>
 
       {/* Crop Modal */}
