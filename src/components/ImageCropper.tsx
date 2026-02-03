@@ -4,8 +4,10 @@ import { Check, X, Move, RotateCcw } from 'lucide-react';
 
 interface ImageCropperProps {
   imageUrl: string;
-  onCrop: (croppedBlob: Blob) => void;
+  originalImageUrl: string;
+  onCrop: (croppedBlob: Blob | null) => void;
   onCancel: () => void;
+  onResetToOriginal: () => void;
 }
 
 interface CropArea {
@@ -22,15 +24,17 @@ interface ImageOffset {
   height: number;
 }
 
-const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
+const ImageCropper = ({ imageUrl, originalImageUrl, onCrop, onCancel, onResetToOriginal }: ImageCropperProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState(imageUrl);
   const [cropArea, setCropArea] = useState<CropArea>({ x: 0, y: 0, width: 100, height: 100 });
   const [imageOffset, setImageOffset] = useState<ImageOffset>({ left: 0, top: 0, width: 0, height: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isResetToOriginal, setIsResetToOriginal] = useState(false);
 
   const updateImageOffset = useCallback(() => {
     if (imageRef.current && containerRef.current) {
@@ -58,6 +62,13 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
       });
     }
   }, []);
+
+  // Handle reset to original uploaded image
+  const handleResetToOriginal = useCallback(() => {
+    setIsResetToOriginal(true);
+    setImageLoaded(false);
+    setCurrentImageUrl(originalImageUrl);
+  }, [originalImageUrl]);
 
   useEffect(() => {
     if (imageLoaded) {
@@ -134,6 +145,13 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
   }, []);
 
   const handleCrop = useCallback(() => {
+    // If reset to original was clicked, apply the reset
+    if (isResetToOriginal) {
+      onResetToOriginal();
+      onCrop(null); // Signal that we're resetting, not cropping
+      return;
+    }
+
     if (!imageRef.current) return;
 
     const img = imageRef.current;
@@ -165,7 +183,7 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
     canvas.toBlob((blob) => {
       if (blob) onCrop(blob);
     }, 'image/png');
-  }, [cropArea, onCrop]);
+  }, [cropArea, onCrop, isResetToOriginal, onResetToOriginal]);
 
   // Calculate absolute positions for crop area overlay
   const cropAbsoluteLeft = imageOffset.left + cropArea.x;
@@ -185,7 +203,7 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h3 className="text-lg font-display font-semibold">Crop Image</h3>
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={resetCropArea} className="btn-secondary px-3 py-2 text-sm flex items-center gap-1.5 flex-1 sm:flex-none justify-center">
+            <button onClick={handleResetToOriginal} className={`btn-secondary px-3 py-2 text-sm flex items-center gap-1.5 flex-1 sm:flex-none justify-center ${isResetToOriginal ? 'ring-2 ring-primary' : ''}`}>
               <RotateCcw className="w-4 h-4" />
               <span className="hidden xs:inline">Reset</span>
             </button>
@@ -195,7 +213,7 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
             </button>
             <button onClick={handleCrop} className="btn-primary px-3 py-2 text-sm flex items-center gap-1.5 flex-1 sm:flex-none justify-center">
               <Check className="w-4 h-4" />
-              <span className="hidden xs:inline">Apply</span>
+              <span className="hidden xs:inline">{isResetToOriginal ? 'Apply Reset' : 'Apply'}</span>
             </button>
           </div>
         </div>
@@ -206,7 +224,7 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
         >
           <img
             ref={imageRef}
-            src={imageUrl}
+            src={currentImageUrl}
             alt="Crop preview"
             className="max-w-full max-h-[60vh] object-contain"
             onLoad={() => setImageLoaded(true)}
