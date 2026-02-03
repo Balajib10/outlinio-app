@@ -181,21 +181,21 @@ const ImageCropper = ({ imageUrl, onCrop, onCancel }: ImageCropperProps) => {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      <div className="glass-card p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-card p-4 sm:p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h3 className="text-lg font-display font-semibold">Crop Image</h3>
-          <div className="flex items-center gap-2">
-            <button onClick={resetCropArea} className="btn-secondary px-4 py-2 flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button onClick={resetCropArea} className="btn-secondary px-3 py-2 text-sm flex items-center gap-1.5 flex-1 sm:flex-none justify-center">
               <RotateCcw className="w-4 h-4" />
-              Reset
+              <span className="hidden xs:inline">Reset</span>
             </button>
-            <button onClick={onCancel} className="btn-secondary px-4 py-2 flex items-center gap-2">
+            <button onClick={onCancel} className="btn-secondary px-3 py-2 text-sm flex items-center gap-1.5 flex-1 sm:flex-none justify-center">
               <X className="w-4 h-4" />
-              Cancel
+              <span className="hidden xs:inline">Cancel</span>
             </button>
-            <button onClick={handleCrop} className="btn-primary px-4 py-2 flex items-center gap-2">
+            <button onClick={handleCrop} className="btn-primary px-3 py-2 text-sm flex items-center gap-1.5 flex-1 sm:flex-none justify-center">
               <Check className="w-4 h-4" />
-              Apply Crop
+              <span className="hidden xs:inline">Apply</span>
             </button>
           </div>
         </div>
