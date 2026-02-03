@@ -31,12 +31,14 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
   } = useImageProcessing();
 
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null); // Store the original uploaded file URL
   const [showCropper, setShowCropper] = useState(false);
 
   useEffect(() => {
     loadImage(imageFile);
     const url = URL.createObjectURL(imageFile);
     setOriginalUrl(url);
+    setUploadedFileUrl(url); // Keep reference to the truly original image
     return () => URL.revokeObjectURL(url);
   }, [imageFile, loadImage]);
 
@@ -61,10 +63,34 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleCrop = useCallback(async (croppedBlob: Blob) => {
-    await loadImageFromBlob(croppedBlob);
+  const handleCrop = useCallback(async (croppedBlob: Blob | null) => {
+    if (croppedBlob) {
+      await loadImageFromBlob(croppedBlob);
+    }
     setShowCropper(false);
   }, [loadImageFromBlob]);
+
+  const handleResetToOriginal = useCallback(async () => {
+    // Reset to the original uploaded image
+    if (uploadedFileUrl) {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(async (blob) => {
+            if (blob) {
+              await loadImageFromBlob(blob);
+            }
+          }, 'image/png');
+        }
+      };
+      img.src = uploadedFileUrl;
+    }
+  }, [uploadedFileUrl, loadImageFromBlob]);
 
   const handleRotate = useCallback((degrees: number) => {
     rotateImage(degrees);
@@ -227,11 +253,13 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
 
       {/* Crop Modal */}
       <AnimatePresence>
-        {showCropper && originalUrl && (
+        {showCropper && originalUrl && uploadedFileUrl && (
           <ImageCropper
             imageUrl={originalUrl}
+            originalImageUrl={uploadedFileUrl}
             onCrop={handleCrop}
             onCancel={() => setShowCropper(false)}
+            onResetToOriginal={handleResetToOriginal}
           />
         )}
       </AnimatePresence>
