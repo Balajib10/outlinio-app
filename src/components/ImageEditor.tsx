@@ -8,7 +8,7 @@ import ExportMenu from './ExportMenu';
 import PreProcessingTools from './PreProcessingTools';
 import ImageCropper from './ImageCropper';
 import { useImageProcessing } from '@/hooks/useImageProcessing';
-import { ProcessingSettings } from '@/lib/sketchProcessing';
+import { ProcessingSettings, defaultSettings } from '@/lib/sketchProcessing';
 
 interface ImageEditorProps {
   imageFile: File;
@@ -114,7 +114,7 @@ const ImageEditor = ({ imageFile, onBack }: ImageEditorProps) => {
           </button>
           
           <button
-            onClick={() => setSettings(prev => ({ ...prev }))}
+            onClick={() => setSettings(defaultSettings)}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
