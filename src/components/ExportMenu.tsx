@@ -55,10 +55,10 @@ const ExportMenu = ({ onExport, disabled }: ExportMenuProps) => {
       <AnimatePresence>
         {isOpen && !isExporting && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute bottom-full left-0 right-0 mb-2 glass-card p-2 space-y-1 max-h-80 overflow-y-auto z-50"
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute top-full left-0 right-0 mt-2 glass-card p-2 space-y-1 max-h-80 overflow-y-auto z-[100]"
           >
             <div className="text-xs text-muted-foreground px-3 py-1 font-medium">Standard Formats</div>
             {options.slice(0, 3).map((option) => (
