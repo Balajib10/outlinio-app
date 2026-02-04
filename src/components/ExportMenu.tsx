@@ -71,7 +71,8 @@ const ExportMenu = ({ onExport, disabled }: ExportMenuProps) => {
       <DropdownMenuContent
         align="center"
         sideOffset={8}
-        className="z-[200] w-[min(22rem,calc(100vw-2rem))] max-h-[min(24rem,calc(100dvh-10rem))] overflow-y-auto border-border/70 bg-popover/90 backdrop-blur-xl shadow-lg"
+        className="z-[200] w-[min(22rem,calc(100vw-2rem))] max-h-[min(24rem,calc(100dvh-10rem))] overflow-y-auto overscroll-contain touch-pan-y border-border/70 bg-popover/90 backdrop-blur-xl shadow-lg"
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <DropdownMenuLabel className="text-xs text-muted-foreground">Standard Formats</DropdownMenuLabel>
 
