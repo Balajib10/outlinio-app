@@ -1,8 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Pencil, Moon, Sun, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const location = useLocation();
@@ -33,13 +32,11 @@ const Header = () => {
   };
   
   const handleLogoClick = (e: React.MouseEvent) => {
-    e.preventDefault();
     if (location.pathname === '/') {
+      e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      navigate('/');
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
     }
+    // Let Link handle navigation when on other pages
   };
 
   const navLinks = [
@@ -57,14 +54,14 @@ const Header = () => {
       className="fixed top-0 left-0 right-0 z-50 glass-card border-0 border-b"
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="/" onClick={handleLogoClick} className="flex items-center gap-2 group cursor-pointer">
+        <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 group">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center btn-primary p-0">
             <Pencil className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="text-xl font-display font-bold gradient-text">
             OUTLINIO
           </span>
-        </a>
+        </Link>
         
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
