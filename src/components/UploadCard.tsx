@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Image, Camera, Clipboard, X, Sparkles } from 'lucide-react';
+import { Upload, Camera, Clipboard, X, Sparkles } from 'lucide-react';
+import { useRef } from 'react';
 
 interface UploadCardProps {
   onImageSelect: (file: File) => void;
@@ -10,6 +11,8 @@ interface UploadCardProps {
 const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): boolean => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
@@ -70,6 +73,16 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
     if (file) handleFile(file);
   }, [handleFile]);
 
+  const handleUploadClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleCameraClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Direct invocation from user gesture for browser security
+    cameraInputRef.current?.click();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -81,14 +94,24 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
+        onClick={handleUploadClick}
         className={`upload-zone relative ${isDragOver ? 'drag-over' : ''}`}
       >
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/jpeg,image/jpg,image/png"
           onChange={handleFileInput}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          className="hidden"
           disabled={isLoading}
+        />
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileInput}
+          className="hidden"
         />
         
         <AnimatePresence mode="wait">
@@ -132,6 +155,7 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
+                    // Direct invocation from user gesture - required by browser security
                     handlePaste();
                   }}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-muted transition-colors"
@@ -140,17 +164,14 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
                   Paste from clipboard
                 </button>
                 
-                <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-muted transition-colors cursor-pointer">
+                <button
+                  type="button"
+                  onClick={handleCameraClick}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium hover:bg-muted transition-colors cursor-pointer"
+                >
                   <Camera className="w-4 h-4" />
                   Take photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={handleFileInput}
-                    className="hidden"
-                  />
-                </label>
+                </button>
               </div>
             </motion.div>
           )}
