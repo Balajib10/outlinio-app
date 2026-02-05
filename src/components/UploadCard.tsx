@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Camera, Clipboard, X, Sparkles } from 'lucide-react';
 import { useRef } from 'react';
+import CameraCapture from './CameraCapture';
 
 interface UploadCardProps {
   onImageSelect: (file: File) => void;
@@ -12,7 +13,7 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   const validateFile = (file: File): boolean => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
@@ -80,16 +81,23 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
   const handleCameraClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     // Direct invocation from user gesture for browser security
-    cameraInputRef.current?.click();
+    setIsCameraOpen(true);
   }, []);
 
+  const handleCameraCapture = useCallback((file: File) => {
+    if (validateFile(file)) {
+      onImageSelect(file);
+    }
+  }, [onImageSelect]);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="w-full max-w-2xl mx-auto"
-    >
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="w-full max-w-2xl mx-auto"
+      >
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -104,14 +112,6 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
           onChange={handleFileInput}
           className="hidden"
           disabled={isLoading}
-        />
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFileInput}
-          className="hidden"
         />
         
         <AnimatePresence mode="wait">
@@ -221,7 +221,14 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
           </div>
         </div>
       </motion.div>
-    </motion.div>
+      </motion.div>
+
+      <CameraCapture
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={handleCameraCapture}
+      />
+    </>
   );
 };
 
