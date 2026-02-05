@@ -221,6 +221,36 @@ const UploadCard = ({ onImageSelect, isLoading }: UploadCardProps) => {
           </div>
         </div>
       </motion.div>
+      
+      {/* UpscalePics Tip */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-4 p-4 rounded-xl glass-card"
+      >
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-semibold text-sm mb-1">
+              ✨ Improve Photo Quality (Optional)
+            </h4>
+            <p className="text-sm text-muted-foreground mb-3">
+              Low-quality or blurry images may produce rough sketch outlines. For better and cleaner results, enhance your image before converting.
+            </p>
+            <a
+              href="https://upscalepics.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Enhance Image with UpscalePics (Free) →
+            </a>
+          </div>
+        </div>
+      </motion.div>
       </motion.div>
 
       <CameraCapture
