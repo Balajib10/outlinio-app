@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -22,6 +22,12 @@ const Index = () => {
   const handleBack = () => {
     setSelectedFile(null);
   };
+
+  useEffect(() => {
+    const handler = () => setSelectedFile(null);
+    window.addEventListener('outlinio-go-home', handler);
+    return () => window.removeEventListener('outlinio-go-home', handler);
+  }, []);
 
   if (selectedFile) {
     return (

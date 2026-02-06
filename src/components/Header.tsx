@@ -34,9 +34,9 @@ const Header = () => {
   const handleLogoClick = (e: React.MouseEvent) => {
     if (location.pathname === '/') {
       e.preventDefault();
+      window.dispatchEvent(new CustomEvent('outlinio-go-home'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    // Let Link handle navigation when on other pages
   };
 
   const navLinks = [
