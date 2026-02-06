@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Pencil, Heart, Github, Twitter } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import outlinioLogo from '@/assets/outlinio-logo.jpeg';
 
 const Footer = () => {
   return (
@@ -8,9 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center btn-primary p-0">
-                <Pencil className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <img src={outlinioLogo} alt="OUTLINIO" className="w-10 h-10 rounded-xl object-cover" />
               <span className="text-xl font-display font-bold gradient-text">
                 OUTLINIO
               </span>
@@ -28,22 +27,22 @@ const Footer = () => {
             <h4 className="font-display font-semibold mb-4">Navigation</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/how-it-works" className="text-muted-foreground hover:text-primary transition-colors">
                   How It Works
                 </Link>
               </li>
               <li>
-                <Link to="/gallery" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/gallery" className="text-muted-foreground hover:text-primary transition-colors">
                   Gallery
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
                   About
                 </Link>
               </li>
