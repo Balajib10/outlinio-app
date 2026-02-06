@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Pencil, Moon, Sun, Menu, X } from 'lucide-react';
+import { Moon, Sun, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import outlinioLogo from '@/assets/outlinio-logo.jpeg';
 
 const Header = () => {
   const location = useLocation();
@@ -55,9 +56,7 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center btn-primary p-0">
-            <Pencil className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src={outlinioLogo} alt="OUTLINIO" className="w-10 h-10 rounded-xl object-cover" />
           <span className="text-xl font-display font-bold gradient-text">
             OUTLINIO
           </span>
