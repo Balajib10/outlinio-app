@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Moon, Sun, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -6,11 +6,9 @@ import outlinioLogo from '@/assets/outlinio-logo.jpeg';
 
 const Header = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Initialize dark mode from system preference or localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -52,11 +50,19 @@ const Header = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 glass-card border-0 border-b"
+      className="fixed top-0 left-0 right-0 z-50 border-0 border-b border-border/50"
+      style={{
+        background: 'var(--glass-bg)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+      }}
     >
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2 group">
-          <img src={outlinioLogo} alt="OUTLINIO" className="w-10 h-10 rounded-xl object-cover" />
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2.5 group">
+          <div className="relative">
+            <img src={outlinioLogo} alt="OUTLINIO" className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
           <span className="text-xl font-display font-bold gradient-text">
             OUTLINIO
           </span>
@@ -70,19 +76,18 @@ const Header = () => {
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 location.pathname === link.path
                   ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
               }`}
             >
               {link.label}
             </Link>
           ))}
           
-          {/* Dark Mode Toggle */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleDarkMode}
-            className="ml-2 p-2 rounded-lg bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            className="ml-2 p-2 rounded-lg bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground transition-all duration-300"
             aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -119,7 +124,7 @@ const Header = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="md:hidden border-t border-border"
+          className="md:hidden border-t border-border/50"
         >
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
             {navLinks.map((link) => (
@@ -130,7 +135,7 @@ const Header = () => {
                 className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                   location.pathname === link.path
                     ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
                 }`}
               >
                 {link.label}

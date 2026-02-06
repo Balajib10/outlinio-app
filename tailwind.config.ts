@@ -73,6 +73,7 @@ export default {
       boxShadow: {
         glass: "var(--glass-shadow)",
         glow: "var(--shadow-glow)",
+        "glow-teal": "var(--shadow-glow-teal)",
       },
       keyframes: {
         "accordion-down": {

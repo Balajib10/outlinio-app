@@ -6,112 +6,117 @@
 
 @layer base {
   :root {
-    --background: 240 20% 99%;
-    --foreground: 240 10% 10%;
+    /* OUTLINIO Logo Palette - Light Mode: "Digital Sketch Paper" */
+    --background: 228 33% 97%;
+    --foreground: 249 33% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card-foreground: 249 33% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover-foreground: 249 33% 16%;
 
-    --primary: 252 87% 58%;
+    --primary: 258 84% 59%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 6% 95%;
-    --secondary-foreground: 240 10% 20%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 249 33% 16%;
 
-    --muted: 240 6% 92%;
-    --muted-foreground: 240 5% 45%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 220 9% 43%;
 
-    --accent: 217 91% 60%;
+    --accent: 182 100% 40%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 252 87% 58%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 258 84% 59%;
 
     --radius: 0.75rem;
 
-    /* Custom tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(252 87% 58%) 0%, hsl(217 91% 60%) 50%, hsl(190 90% 50%) 100%);
-    --gradient-primary-soft: linear-gradient(135deg, hsl(252 87% 58% / 0.1) 0%, hsl(217 91% 60% / 0.1) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(252 87% 98%) 0%, hsl(240 20% 99%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.8) 0%, hsl(0 0% 100% / 0.4) 100%);
+    /* OUTLINIO Custom Tokens - Light */
+    --gradient-primary: linear-gradient(135deg, hsl(258 84% 59%) 0%, hsl(182 100% 40%) 100%);
+    --gradient-primary-soft: linear-gradient(135deg, hsl(258 84% 59% / 0.08) 0%, hsl(182 100% 40% / 0.08) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(258 84% 97%) 0%, hsl(228 33% 97%) 50%, hsl(182 100% 97%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 100% / 0.5) 100%);
     
-    --glass-bg: hsl(0 0% 100% / 0.7);
-    --glass-border: hsl(0 0% 100% / 0.5);
-    --glass-shadow: 0 8px 32px hsl(252 87% 58% / 0.08);
+    --glass-bg: hsl(0 0% 100% / 0.75);
+    --glass-border: hsl(258 84% 59% / 0.12);
+    --glass-shadow: 0 8px 32px hsl(258 84% 59% / 0.06);
     
-    --shadow-sm: 0 2px 8px hsl(240 10% 10% / 0.04);
-    --shadow-md: 0 4px 16px hsl(240 10% 10% / 0.06);
-    --shadow-lg: 0 8px 32px hsl(240 10% 10% / 0.08);
-    --shadow-glow: 0 0 40px hsl(252 87% 58% / 0.2);
+    --shadow-sm: 0 2px 8px hsl(249 33% 16% / 0.04);
+    --shadow-md: 0 4px 16px hsl(249 33% 16% / 0.06);
+    --shadow-lg: 0 8px 32px hsl(249 33% 16% / 0.08);
+    --shadow-glow: 0 0 40px hsl(258 84% 59% / 0.15);
+    --shadow-glow-teal: 0 0 30px hsl(182 100% 40% / 0.15);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary: 258 84% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 258 84% 59%;
   }
 
   .dark {
-    --background: 240 10% 6%;
+    /* OUTLINIO Logo Palette - Dark Mode: "Creative Studio" */
+    --background: 0 0% 7%;
     --foreground: 0 0% 95%;
 
-    --card: 240 10% 10%;
+    --card: 249 33% 13%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 240 10% 10%;
+    --popover: 249 33% 13%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 252 87% 65%;
+    --primary: 258 84% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 6% 15%;
+    --secondary: 240 5% 16%;
     --secondary-foreground: 0 0% 90%;
 
-    --muted: 240 6% 18%;
-    --muted-foreground: 240 5% 60%;
+    --muted: 240 5% 20%;
+    --muted-foreground: 220 9% 60%;
 
-    --accent: 217 91% 65%;
+    --accent: 182 100% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 20%;
-    --input: 240 6% 20%;
-    --ring: 252 87% 65%;
+    --border: 249 10% 18%;
+    --input: 249 10% 18%;
+    --ring: 258 84% 65%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(252 87% 65%) 0%, hsl(217 91% 65%) 50%, hsl(190 90% 55%) 100%);
-    --gradient-primary-soft: linear-gradient(135deg, hsl(252 87% 65% / 0.15) 0%, hsl(217 91% 65% / 0.15) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(252 50% 8%) 0%, hsl(240 10% 6%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(240 10% 12% / 0.9) 0%, hsl(240 10% 10% / 0.7) 100%);
+    /* OUTLINIO Custom Tokens - Dark */
+    --gradient-primary: linear-gradient(135deg, hsl(258 84% 65%) 0%, hsl(182 100% 45%) 100%);
+    --gradient-primary-soft: linear-gradient(135deg, hsl(258 84% 65% / 0.12) 0%, hsl(182 100% 45% / 0.12) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(249 33% 8%) 0%, hsl(0 0% 7%) 50%, hsl(249 20% 8%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(249 33% 14% / 0.9) 0%, hsl(249 33% 11% / 0.7) 100%);
     
-    --glass-bg: hsl(240 10% 12% / 0.8);
-    --glass-border: hsl(240 6% 25% / 0.5);
+    --glass-bg: hsl(249 33% 12% / 0.85);
+    --glass-border: hsl(249 10% 25% / 0.5);
     --glass-shadow: 0 8px 32px hsl(0 0% 0% / 0.3);
     
     --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.2);
     --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.25);
     --shadow-lg: 0 8px 32px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 40px hsl(252 87% 65% / 0.25);
+    --shadow-glow: 0 0 40px hsl(258 84% 65% / 0.2);
+    --shadow-glow-teal: 0 0 30px hsl(182 100% 45% / 0.2);
 
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 249 33% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 258 84% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border: 249 10% 18%;
+    --sidebar-ring: 258 84% 65%;
   }
 }
 
@@ -201,7 +206,7 @@
   .upload-zone {
     @apply glass-card-hover p-8 cursor-pointer;
     background: var(--gradient-primary-soft);
-    border: 2px dashed hsl(var(--border));
+    border: 2px dashed hsl(var(--primary) / 0.35);
     transition: all 0.3s ease;
   }
 
@@ -231,7 +236,7 @@
 
   .feature-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-lg), var(--shadow-glow-teal);
   }
 
   .comparison-handle {
