@@ -107,6 +107,17 @@ const About = () => {
               Start Creating
             </Link>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <p className="text-sm text-muted-foreground">
+              Developed by <span className="font-semibold gradient-text">Balaji B</span>
+            </p>
+          </motion.div>
         </div>
       </main>
 
