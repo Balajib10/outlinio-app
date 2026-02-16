@@ -115,7 +115,7 @@ const About = () => {
             className="text-center mt-12"
           >
             <p className="text-sm text-muted-foreground">
-              Developed by <span className="font-semibold gradient-text">Balaji B</span>
+              Developed by <span className="font-semibold gradient-text">Manasathevi</span>
             </p>
           </motion.div>
         </div>
